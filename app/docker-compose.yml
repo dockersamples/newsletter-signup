@@ -1,13 +1,9 @@
-version: '3.1'
+version: '3.3'
 
 services:
   
   db:
-    image: microsoft/mssql-server-windows-express
-    environment: 
-      - ACCEPT_EULA=Y
-    env_file:
-      - db-credentials.env
+    image: dockersamples/signup-db
     networks:
       - app-net
 
@@ -18,8 +14,6 @@ services:
 
   web:
     image: dockersamples/signup-web
-    env_file:
-      - db-credentials.env
     depends_on:
       - db
       - message-queue
@@ -28,8 +22,6 @@ services:
 
   save-handler:
     image: dockersamples/signup-save-handler
-    env_file:
-      - db-credentials.env
     depends_on:
       - db
       - message-queue

@@ -1,18 +1,32 @@
-version: '3.1'
+version: '3.3'
 
 services:
 
   db:
     ports:    
-      - "1433:1433"
-
-  kibana:
-    ports:
-      - "5601:5601"
+      - "1433"
+    environment: 
+      - PASSWORD_PATH=C:\fake-secrets\sapassword.txt
+    volumes:
+      - .\fake-secrets:C:\fake-secrets
 
   web:
     ports:
-      - "80:80"
+      - "80"
+    environment: 
+      - DB_CONNECTION_STRING_PATH=C:\fake-secrets\connectionstring.txt
+    volumes:
+      - .\fake-secrets:C:\fake-secrets
+      
+  save-handler:
+    environment: 
+      - DB_CONNECTION_STRING_PATH=C:\fake-secrets\connectionstring.txt
+    volumes:
+      - .\fake-secrets:C:\fake-secrets
+  
+  kibana:
+    ports:
+      - "5601"
 
 networks:
   app-net:

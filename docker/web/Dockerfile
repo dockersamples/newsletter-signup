@@ -16,9 +16,15 @@ SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPref
 
 RUN Set-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' -Name ServerPriorityTimeLimit -Value 0 -Type DWord
 
-RUN Remove-Website -Name 'Default Web Site';`
-    New-Item -Path 'C:\web-app' -Type Directory; `
-    New-Website -Name 'web-app' -Port 80 -PhysicalPath 'C:\web-app'
+WORKDIR C:\web-app
+RUN Import-Module WebAdministration; `
+    Remove-Website -Name 'Default Web Site'; `
+    New-WebAppPool -Name 'ap-signup'; `
+    Set-ItemProperty IIS:\AppPools\ap-signup -Name managedRuntimeVersion -Value v4.0; `
+    Set-ItemProperty IIS:\AppPools\ap-signup -Name processModel.identityType -Value LocalSystem; `
+    New-Website -Name 'web-app' `
+                -Port 80 -PhysicalPath 'C:\web-app' `
+                -ApplicationPool 'ap-signup'
 
 HEALTHCHECK --interval=5s `
  CMD powershell -command `
@@ -29,6 +35,7 @@ HEALTHCHECK --interval=5s `
     } catch { return 1 }
 
 ENV MESSAGE_QUEUE_URL="nats://message-queue:4222" `
+    DB_CONNECTION_STRING_PATH="C:\ProgramData\Docker\secrets\signup-db.connectionstring" `
     DB_MAX_RETRY_COUNT="5" `
     DB_MAX_DELAY_SECONDS="10"
 

@@ -18,4 +18,6 @@ RUN Set-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Par
 WORKDIR /e2e-tests
 CMD nunit3-console SignUp.EndToEndTests.dll
 
+ENV DB_CONNECTION_STRING_PATH="C:\ProgramData\Docker\secrets\signup-db.connectionstring"
+
 COPY --from=builder C:\out\tests\EndToEndTests .
