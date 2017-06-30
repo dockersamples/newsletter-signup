@@ -4,6 +4,7 @@ using OpenQA.Selenium.Support.UI;
 using SimpleBrowser.WebDriver;
 using System;
 using System.Data.SqlClient;
+using System.IO;
 using System.Threading;
 using TechTalk.SpecFlow;
 
@@ -68,7 +69,8 @@ namespace SignUp.EndToEndTests
             AssertHelper.RetryAssert(50, 40, $"Email address: {_emailAddress} not found", () =>
             {
                 var count = 0;
-                var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+                var connectionStringPath = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING_PATH");
+                var connectionString = File.ReadAllText(connectionStringPath);
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();

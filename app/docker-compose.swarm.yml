@@ -1,0 +1,75 @@
+version: '3.3'
+
+services:
+
+  db:
+    secrets:
+      - signup-db-sa.password
+    deploy:
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+          - node.platform.os == windows
+
+  message-queue:
+    deploy:
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+          - node.platform.os == windows
+
+  web:
+    ports:
+     - mode: host
+       published: 80
+       target: 80
+    secrets:
+      - signup-db.connectionstring
+    deploy:
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+          - node.platform.os == windows 
+
+  save-handler:
+    secrets:
+      - signup-db.connectionstring
+    deploy:
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+          - node.platform.os == windows
+
+  index-handler:
+    deploy:
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+          - node.platform.os == windows         
+
+  elasticsearch:
+    environment:
+      - ES_JAVA_OPTS=-Xms768m -Xmx768m
+    deploy:
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+          - node.platform.os == windows
+
+  kibana:
+    ports:
+     - mode: host
+       published: 5601
+       target: 5601
+    deploy:
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+          - node.platform.os == windows
+
+secrets:
+  signup-db-sa.password:
+    external: true
+
+  signup-db.connectionstring:
+    external: true

@@ -47,10 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config.cs" />
+    <Compile Include="Configuration\Config.cs" />
+    <Compile Include="Configuration\Secret.cs" />
     <Compile Include="Initializers\StaticDataInitializer.cs" />
-    <Compile Include="ProductLaunchConfiguration.cs" />
-    <Compile Include="ProductLaunchContext.cs" />
+    <Compile Include="SignUpConfiguration.cs" />
+    <Compile Include="SignUpContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

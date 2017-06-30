@@ -3,7 +3,7 @@
 FROM sixeyed/msbuild:netfx-4.5.2-10.0.14393.1198 AS builder
 
 WORKDIR C:\src\SignUp.MessageHandlers.SaveProspect
-COPY src\SignUp\SignUp.MessageHandlers.SaveProspect\packages.config .
+COPY .\src\SignUp\SignUp.MessageHandlers.SaveProspect\packages.config .
 RUN nuget restore packages.config -PackagesDirectory ..\packages
 
 COPY src\SignUp C:\src
@@ -19,6 +19,7 @@ WORKDIR /save-prospect-handler
 CMD .\SignUp.MessageHandlers.SaveProspect.exe
 
 ENV MESSAGE_QUEUE_URL="nats://message-queue:4222" `
+    DB_CONNECTION_STRING_PATH="C:\ProgramData\Docker\secrets\signup-db.connectionstring" `
     DB_MAX_RETRY_COUNT="5" `
     DB_MAX_DELAY_SECONDS="10"
 
