@@ -1,6 +1,8 @@
-# Newsletter Sign Up
+# Newsletter Sign Up - .NET 3.5
 
-> This is a branch of the [Newsletter Sign Up app](https://github.com/dockersamples/newsletter-signup) which uses a .NET 3.5 cut of the code. These is the sample application used in the video series [Modernizing .NET Apps for IT Pros](https://dockr.ly/mta-itpro).
+This is a branch of the [Newsletter Sign Up app](https://github.com/dockersamples/newsletter-signup) which uses a .NET 3.5 cut of the code. 
+
+> This is the sample application used in the video series [Modernizing .NET Apps for IT Pros](https://dockr.ly/mta-itpro).
 
 A .NET Framework app using Docker containers on Windows. The app lets users sign up to a fictional newsletter:
 
