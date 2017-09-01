@@ -1,0 +1,42 @@
+version: '3.3'
+
+services:
+  
+  signup-app:
+    image: dockersamples/mta-itpro-signup-app:v5
+    ports:
+    - mode: host
+      published: 80
+      target: 8090
+    networks:
+      - app-net
+    secrets:
+      - connection-strings
+    deploy:
+      replicas: 1
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+        - node.platform.os == windows
+
+  signup-prometheus:
+    image: dockersamples/mta-itpro-signup-prometheus
+    ports:
+    - mode: host
+      published: 9090
+      target: 9090
+    networks:
+      - app-net
+    deploy:
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+        - node.platform.os == windows
+
+secrets:
+  connection-strings:
+    external:
+      name: newsletter-connection-strings
+    
+networks:
+  app-net:

@@ -1,9 +1,8 @@
-﻿using SignUp.Entities;
-using SignUp.Messaging;
-using SignUp.Messaging.Messages.Events;
-using SignUp.Model;
+﻿using SignUp.Web.Logging;
+using SignUp.Web.Model;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -11,28 +10,33 @@ using System.Web.UI.WebControls;
 namespace SignUp.Web
 {
     public partial class SignUp : Page
-    {
+    {     
         private static Dictionary<string, Country> _Countries;
         private static Dictionary<string, Role> _Roles;
 
         public static void PreloadStaticDataCache()
         {
+            Log.Info("Starting pre-load data cache");
+            var stopwatch = Stopwatch.StartNew();
+
             _Countries = new Dictionary<string, Country>();
             _Roles = new Dictionary<string, Role>();
-            using (var context = new SignUpContext())
+            using (var context = new SignUpDbEntities())
             {
-                _Countries["-"] = context.Countries.Single(x => x.CountryCode == "-");
+                _Countries["-"] = context.Countries.First(x => x.CountryCode == "-");
                 foreach (var country in context.Countries.Where(x=>x.CountryCode != "-").OrderBy(x => x.CountryName))
                 {
                     _Countries[country.CountryCode] = country;
                 }
 
-                _Roles["-"] = context.Roles.Single(x => x.RoleCode == "-");
+                _Roles["-"] = context.Roles.First(x => x.RoleCode == "-");
                 foreach (var role in context.Roles.Where(x => x.RoleCode != "-").OrderBy(x => x.RoleName))
                 {
                     _Roles[role.RoleCode] = role;
                 }
             }
+
+            Log.Info("Completed pre-load data cache, took: {0}ms", stopwatch.ElapsedMilliseconds);
         }
 
         protected void Page_Load(object sender, EventArgs e)
@@ -66,30 +70,22 @@ namespace SignUp.Web
                 CompanyName = txtCompanyName.Text,
                 EmailAddress = txtEmail.Text,
                 FirstName = txtFirstName.Text,
-                LastName = txtLastName.Text,
-                Country = country,
-                Role = role
+                LastName = txtLastName.Text
             };
 
-            //v1:
-            //using (var context = new SignUpContext())
-            //{
-            //    //reload child objects:
-            //    prospect.Country = context.Countries.Single(x => x.CountryCode == prospect.Country.CountryCode);
-            //    prospect.Role = context.Roles.Single(x => x.RoleCode == prospect.Role.RoleCode);
+            Log.Info("Saving new prospect, email address: {0}", prospect.EmailAddress);
+            var stopwatch = Stopwatch.StartNew();
 
-            //    context.Prospects.Add(prospect);
-            //    context.SaveChanges();
-            //}
-
-            //v2:
-            var eventMessage = new ProspectSignedUpEvent
+            using (var context = new SignUpDbEntities())
             {
-                Prospect = prospect,
-                SignedUpAt = DateTime.UtcNow
-            };
+                //reload child objects:
+                prospect.Country = context.Countries.First(x => x.CountryCode == country.CountryCode);
+                prospect.Role = context.Roles.First(x => x.RoleCode == role.RoleCode);
 
-            MessageQueue.Publish(eventMessage);
+                context.AddToProspects(prospect);
+                context.SaveChanges();
+            }
+            Log.Info("Prospect saved, email address: {0}, ID: {1}, took: {2}ms", prospect.EmailAddress, prospect.ProspectId, stopwatch.ElapsedMilliseconds);
 
             Server.Transfer("ThankYou.aspx");
         }

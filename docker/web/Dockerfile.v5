@@ -1,0 +1,41 @@
+# escape=`
+FROM dockersamples/aspnet-monitoring-exporter AS exporter
+
+FROM microsoft/aspnet:3.5-windowsservercore-10.0.14393.1480
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+# disable DNS cache so container addresses always fetched from Docker
+RUN Set-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' -Name ServerPriorityTimeLimit -Value 0 -Type DWord
+
+RUN Remove-Website 'Default Web Site';
+
+# Set up website: SignUp.Web
+RUN New-Item -Path 'C:\websites\SignUp.Web' -Type Directory -Force; 
+
+RUN Import-Module WebAdministration; `
+    Set-ItemProperty 'IIS:\AppPools\.NET v2.0' -Name processModel.identityType -Value LocalSystem; `
+    New-Website -Name 'SignUp.Web' -PhysicalPath 'C:\websites\SignUp.Web' -Port 8090 -ApplicationPool '.NET v2.0' -Force
+
+EXPOSE 8090
+
+WORKDIR C:\aspnet-exporter
+COPY --from=exporter C:\aspnet-exporter .
+COPY .\v4\w3svc-collectors.json .
+ENV COLLECTOR_CONFIG_PATH="w3svc-collectors.json"
+
+COPY ["SignUp.Web", "/websites/SignUp.Web"]
+COPY .\v5\Web.config C:\websites\SignUp.Web
+
+RUN $path='C:\websites\SignUp.Web'; `
+    $acl = Get-Acl $path; `
+    $newOwner = [System.Security.Principal.NTAccount]('BUILTIN\IIS_IUSRS'); `
+    $acl.SetOwner($newOwner); `
+    dir -r $path | Set-Acl -aclobject  $acl
+
+ENTRYPOINT ["powershell"]
+
+CMD New-Item -Path C:\websites\SignUp.Web\connection-strings.config -ItemType SymbolicLink -Value C:\ProgramData\Docker\secrets\connection-strings; `
+    Start-Service W3SVC; `
+    Invoke-WebRequest http://localhost:8090 -UseBasicParsing | Out-Null; `
+    Start-Process -NoNewWindow C:\aspnet-exporter\aspnet-exporter.exe; `
+    Get-Content -path 'C:\websites\SignUp.Web\App_Data\SignUp.log' -Tail 1 -Wait
