@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2007/06/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="93d52ab56bd24bb3b38b0c9a1cab1578" Name="Diagram1">
+        <EntityTypeShape EntityType="SignUpDbModel.Country" Width="1.5" PointX="0.75" PointY="0.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="SignUpDbModel.Prospect" Width="1.5" PointX="5" PointY="1.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="SignUpDbModel.Role" Width="1.5" PointX="0.75" PointY="2.625" IsExpanded="true" />
+        <AssociationConnector Association="SignUpDbModel.FK_dbo_Prospects_dbo_Countries_Country_CountryCode" ManuallyRouted="false" />
+        <AssociationConnector Association="SignUpDbModel.FK_dbo_Prospects_dbo_Roles_Role_RoleCode" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

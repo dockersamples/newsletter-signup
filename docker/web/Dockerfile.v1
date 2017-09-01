@@ -1,0 +1,23 @@
+# escape=`
+FROM microsoft/aspnet:3.5-windowsservercore-10.0.14393.1198
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+# disable DNS cache so container addresses always fetched from Docker
+RUN Set-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' -Name ServerPriorityTimeLimit -Value 0 -Type DWord
+
+RUN Remove-Website 'Default Web Site';
+
+# Set up website: SignUp.Web
+RUN New-Item -Path 'C:\websites\SignUp.Web' -Type Directory -Force; 
+
+RUN New-Website -Name 'SignUp.Web' -PhysicalPath 'C:\websites\SignUp.Web' -Port 8090 -ApplicationPool '.NET v2.0' -Force; 
+
+EXPOSE 8090
+
+COPY ["SignUp.Web", "/websites/SignUp.Web"]
+
+RUN $path='C:\websites\SignUp.Web'; `
+    $acl = Get-Acl $path; `
+    $newOwner = [System.Security.Principal.NTAccount]('BUILTIN\IIS_IUSRS'); `
+    $acl.SetOwner($newOwner); `
+    dir -r $path | Set-Acl -aclobject  $acl

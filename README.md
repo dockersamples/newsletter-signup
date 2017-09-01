@@ -1,137 +1,59 @@
 # Newsletter Sign Up
 
+> This is a branch of the [Newsletter Sign Up app](https://github.com/dockersamples/newsletter-signup) which uses a .NET 3.5 cut of the code. These is the sample application used in the video series [Modernizing .NET Apps for IT Pros](https://dockr.ly/mta-itpro).
+
 A .NET Framework app using Docker containers on Windows. The app lets users sign up to a fictional newsletter:
 
 ![SignUp homepage](img/signup-homepage.png)
 
 ## Architecture
 
-This is a distributed application, running across multiple containers (defined in [docker-compose.yml](app/docker-compose.yml)):
+This is a distributed application, running across multiple containers (the final version is defined in [docker-stack-v2.yml](app/part-4/docker-stack-v2.yml)):
 
 - `db` - [SQL Server Express](https://store.docker.com/images/mssql-server-windows-express), used to store prospect details
-- `message-queue` - [NATS](https://store.docker.com/images/nats) message queue, used for event publishing and subscribing
-- `web` - ASP.NET WebForms application, front end for prospects to sign up
-- `save-handler` - .NET console app, listens for prospect events and saves data to `db`
-- `index-handler` - .NET console app, listens for prospect events and saves data to `elasticsearch`
-- `elasticsearch` - [Elasticsearch](https://cloud.docker.com/swarm/sixeyed/repository/docker/sixeyed/elasticsearch/general) document database, used for reporting
-- `kibana` - [Kibana](https://cloud.docker.com/swarm/sixeyed/repository/docker/sixeyed/kibana/general) front end to `elasticsearch`, used for self-service analytics
+- `app` - ASP.NET 3.5 WebForms application, front end for prospects to sign up
+- `prometheus` - [Prometheus](https://prometheus.io) monitoring, used to display Windows Performance Counter metrics from the web container
 
-## Pre-reqs
+## Part 1
 
-These are all Windows images, so you'll need Windows 10 or Windows Server 2016, and [Docker for Windows](https://store.docker.com/editions/community/docker-ce-desktop-windows) installed. 
+The first video in the series explains the concepts of Modernizing Traditional Apps (**MTA**) and the goals of the series:
 
-> [Docker secrets](https://docs.docker.com/engine/swarm/secrets/) and [multi-stage builds](https://docs.docker.com/engine/userguide/eng-image/multistage-build/) are used too, so you'll need at least version `17.06` of Docker.
+* the problems of traditional apps, which are built to run on servers and have unique deployment, administration and upgrade processes
+* the benefits of moving traditional apps to the Docker platform - efficiency, portability and security
+* how you can migrate .NET apps from Windows Server to Docker with no code changes
+* how the Docker version of the app is portable, and runs in the same way in the datacenter and in the cloud
+* how all applications are consistent in Docker - they are packaged, distributed, deployed and managed using the same simple tools
 
+> Watch [Modernizing .NET Apps for IT Pros - Part 1](https://www.youtube.com/watch?v=gaJ9PzihAYw&index=1&list=PLkA60AVN3hh88hW4dJXMFIGmTQ4iDBVBp)
 
-## Build - *Optional
+## Part 2
 
-All the images used in the sample are available in public image repositories on Docker Cloud. You don't need to build from source, but if you want to you can clone this repo, and from the root directory use Docker Compose to build the app:
+Uses the [Image2Docker](https://github.com/docker/communitytools-image2docker-win) tool to extract the ASP.NET 3.5 application from a Windows Server 2003 VM to Docker. The tool extracts all the web application binaries, content and configuration from the VM (stored in this repo under [SignUp.Web](docker/web/SignUp.Web)). It also generates a [Dockerfile](docker/web/Dockerfile.v1) to package the app as a Docker image.
 
-```
-docker-compose `
- -f .\app\docker-compose.yml `
- -f .\app\docker-compose.build.yml `
- build 
-```
+The video shows how to add features by iterating on the generated Dockerfile. [Version 2](docker/web/Dockerfile.v2) changes the startup command and relays the application log entries to Docker, so you can see the .NET logs using `docker container logs`.
 
-You'll see that Docker compiles the .NET apps before packaging them into images. That's the multi-stage build using an [image from Docker Cloud with MSBuild installed](https://cloud.docker.com/swarm/sixeyed/repository/docker/sixeyed/msbuild/general), so you don't need Visual Studio - or even .NET - installed on your machine to build this app from source code.
+> Watch [Modernizing .NET Apps for IT Pros - Part 2](https://www.youtube.com/watch?v=7rNTYslgJdQ&index=2&list=PLkA60AVN3hh88hW4dJXMFIGmTQ4iDBVBp)
 
-> The build images use [Windows Server Core](https://store.docker.com/images/windowsservercore), which is a large base image. The first time you run the build it will pull any missing images, which could take a while.
+## Part 3
 
-When the build completes, run the app - you can either run in swarm mode, or on a standalone Docker instance with Docker Compose.
+Demonstrates the update workflow for .NET apps running in Docker Windows containers. In the video you'll see version 2 of the app deployed to a Windows Server 2016 VM running in Azure. That's a .NET 3.5 app moved from an on-premises Windows Server 2003 VM to the cloud in under 10 minutes!
 
-## Running the App in Swarm Mode
+[Version 3](docker/web/Dockerfile.v3) of the Dockerfile uses a newer version of the Windows Server Docker image, which has hotfixes and security patches built in. In Docker you deploy a Windows update to your app by building a new image from the latest Windows image, and replacing your running container. 
 
-The app is configured to use secrets in swarm mode, so the database credentials are securely stored and distributed by the swarm. The only place where the sensitive data can be read is inside the containers, and the application code reads that configuration from the secret files.
+> Watch [Modernizing .NET Apps for IT Pros - Part 3](https://www.youtube.com/watch?v=G6txVNk-Q-s&index=3&list=PLkA60AVN3hh88hW4dJXMFIGmTQ4iDBVBp)
 
-You can turn your laptop into a single-node swarm:
+## Part 4
 
-```
-docker swarm init
-```
+Deploys the app to a highly-available staging environment running on Azure and managed with [Docker Cloud](https://cloud.docker.com). It's still the same ASP.NET 3.5 app with no code changes, but now it's running in a scalable environment where the Docker platform can execute zero-downtime updates.
 
-And now you can create secrets. There's a [script in the repo](app/create-secrets.ps1) that does that for you, but it just creates secrets using the contents of text files:
+[Version 4](docker/web/Dockerfile.v4) of the Dockerfile also exposes the Windows Performance Counters from the container, and the video shows how you can run Prometheus in a Docker Windows container. The Prometheus container reads performance counter values from the web application container and gives you a consistent approach to monitoring in every environment.
 
-```
-cd app
-.\create-secrets.ps1
-```
+> Watch [Modernizing .NET Apps for IT Pros - Part 4](https://www.youtube.com/watch?v=lPjO6My2NLE&index=4&list=PLkA60AVN3hh88hW4dJXMFIGmTQ4iDBVBp)
 
-The [docker-stack.yml](app/docker-stack.yml) file contains the whole application configuration, including the secrets for the web app, console app and database. You can deploy the whole distributed application as a stack:
+## Part 5
 
-```
-docker stack deploy --compose-file docker-stack.yml signup
-```
+Shows you how Docker applications look in production, using [Docker Enterprise Edition](https://www.docker.com/enterprise-edition) - which you can run in the cloud or in the datacenter. The video uses [Universal Control Plane](https://docs.docker.com/datacenter/ucp/2.2/guides/) and [Docker Trusted Registry](https://docs.docker.com/datacenter/dtr/2.3/guides/) as the production-grade Containers-as-a-Service (**CaaS**) platform for deploying, updating and managing the app.
 
-Docker will create all the services, and make the secrets available to the relevant containers. 
+[Version 5](docker/web/Dockerfile.v5) of the application image uses [Docker secrets](https://docs.docker.com/engine/swarm/secrets/) to securely store the connection string for the application database. Docker containers can integrate with services running outside of Docker, andf the video shows the web application running in a Docker Windows container, storing data in a SQL Azure database.
 
-### Running the App with Compose
-
-If you're not running Docker in swarm mode, you can still run the app with Docker Compose. You lose the secure secrets, but you still have the same functionality:
-
-```
-docker-compose `
- -f .\app\docker-compose.yml `
- -f .\app\docker-compose.local.yml up -d
-```
-
-> This approach uses unencrypted text files instead of secrets, so it's only suitable for dev environments. 
-
-## Try the App
-
-If you've deployed the app to a swarm, just browse to the IP address of the swarm host - the web application is mapped to port 80 on the host.
-
-If you've deployed using compose, you'll need the IP address of the `web` container to open the site. In PowerShell, this grabs the IP address of the container and launches your browser:
-
-```
-$ip = docker inspect --format '{{ .NetworkSettings.Networks.nat.IPAddress }}' app_web_1
-start "http://$ip"
-```
-
-The application functionality is the same however you run it, because the stack and the local compose deployment use the same images and the same [core compose file](app/docker-compose.yml).
-
-Save your details and you can check the logs of the message handler services (or containers) to see the events being consumed and processed. You can connect to the SQL Server container from SSMS (using the IP address of the `db` container and the credentials in [db-credentials.env](app/db-credentials.env)), or run a command in the container to see the data:
-
-```
-docker exec app_db_1 `
- powershell "Invoke-SqlCmd -Query 'SELECT * FROM Prospects' -Database SignUp"
-```
-
-You can browse to Kibana too, to see how the data is saved in the reporting database:
-
-```
-$ip = docker inspect --format '{{ .NetworkSettings.Networks.nat.IPAddress }}' app_kibana_1
-start "http://$($ip):5601"
-```
-
-The index is called `prospects`, and you'll see that the fields are pre-populated from Elasticsearch with the data you've added:
-
-![SignUp Kibana](img/signup-kibana.png)
-
-
-## Run End-to-End Tests
-
-There's also an [integration test suite](src/SignUp/SignUp.EndToEndTests/ProspectSignUp.feature) in the source code, which uses [SpecFlow](http://specflow.org/), [Selenium](http://www.seleniumhq.org/) and [SimpleBrowser](https://github.com/SimpleBrowserDotNet/SimpleBrowser). Those tests run a headless web browser which connects to the site and completes the sign up form with a set of known data. Then for each case it checks the data exists in SQL Server.
-
-Build the tests from the root path of the repo:
-
-```
-docker build -t dockersamples/signup-e2e-tests -f docker\e2e-tests\Dockerfile .
-```
-
-The output is an image which has [NUnit Console](https://github.com/nunit/docs/wiki/Console-Command-Line) installed, along with the compiled test suite. Running the test suite in a container means it can access the `web` and `db` app containers by name, using service discovery built into Docker.
-
-Run the tests and you'll see all 26 pass:
-
-```
-docker run --env-file app\db-credentials.env --name e2e-tests dockersamples/signup-e2e-tests
-...
-Test Run Summary
-  Overall result: Passed
-  Test Count: 26, Passed: 26, Failed: 0, Warnings: 0, Inconclusive: 0, Skipped: 0
-  Start time: 2017-05-24 12:34:00Z
-    End time: 2017-05-24 12:34:07Z
-    Duration: 7.349 seconds
-
-Results (nunit3) saved as TestResult.xml
-```
+> Watch [Modernizing .NET Apps for IT Pros - Part 5](https://www.youtube.com/watch?v=f288C_Vqkx4&index=5&list=PLkA60AVN3hh88hW4dJXMFIGmTQ4iDBVBp)

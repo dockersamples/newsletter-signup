@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 5s
+  external_labels:
+    monitor: 'local-monitor'
+
+scrape_configs:
+  - job_name: 'app'
+    static_configs:
+      - targets: ['signup-app:50505']

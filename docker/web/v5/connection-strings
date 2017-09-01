@@ -1,0 +1,5 @@
+<connectionStrings>  
+<add name="SignUpDbEntities" 
+     connectionString="metadata=res://*/Model.SignUpModel.csdl|res://*/Model.SignUpModel.ssdl|res://*/Model.SignUpModel.msl;provider=System.Data.SqlClient;provider connection string=&quot;Server=tcp:mta-ops-db.database.windows.net,1433;Initial Catalog=mta-ops-db;user id=dba;password=DockerCon!!!;MultipleActiveResultSets=True;App=EntityFramework&quot;"
+     providerName="System.Data.EntityClient" />  
+</connectionStrings>  

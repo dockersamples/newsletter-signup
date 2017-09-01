@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="SignUpDbModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2008" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2006/04/edm/ssdl">
+  <EntityContainer Name="SignUpDbModelStoreContainer">
+    <EntitySet Name="Countries" EntityType="SignUpDbModel.Store.Countries" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Prospects" EntityType="SignUpDbModel.Store.Prospects" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Roles" EntityType="SignUpDbModel.Store.Roles" store:Type="Tables" Schema="dbo" />
+    <AssociationSet Name="FK_dbo_Prospects_dbo_Countries_Country_CountryCode" Association="SignUpDbModel.Store.FK_dbo_Prospects_dbo_Countries_Country_CountryCode">
+      <End Role="Countries" EntitySet="Countries" />
+      <End Role="Prospects" EntitySet="Prospects" />
+    </AssociationSet>
+    <AssociationSet Name="FK_dbo_Prospects_dbo_Roles_Role_RoleCode" Association="SignUpDbModel.Store.FK_dbo_Prospects_dbo_Roles_Role_RoleCode">
+      <End Role="Roles" EntitySet="Roles" />
+      <End Role="Prospects" EntitySet="Prospects" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="Countries">
+    <Key>
+      <PropertyRef Name="CountryCode" />
+    </Key>
+    <Property Name="CountryCode" Type="nvarchar" Nullable="false" MaxLength="128" />
+    <Property Name="CountryName" Type="nvarchar(max)" Nullable="true" />
+  </EntityType>
+  <EntityType Name="Prospects">
+    <Key>
+      <PropertyRef Name="ProspectId" />
+    </Key>
+    <Property Name="ProspectId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="FirstName" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="LastName" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="CompanyName" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="EmailAddress" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="Country_CountryCode" Type="nvarchar" MaxLength="128" Nullable="true" />
+    <Property Name="Role_RoleCode" Type="nvarchar" MaxLength="128" Nullable="true" />
+  </EntityType>
+  <EntityType Name="Roles">
+    <Key>
+      <PropertyRef Name="RoleCode" />
+    </Key>
+    <Property Name="RoleCode" Type="nvarchar" Nullable="false" MaxLength="128" />
+    <Property Name="RoleName" Type="nvarchar(max)" Nullable="true" />
+  </EntityType>
+  <Association Name="FK_dbo_Prospects_dbo_Countries_Country_CountryCode">
+    <End Role="Countries" Type="SignUpDbModel.Store.Countries" Multiplicity="0..1" />
+    <End Role="Prospects" Type="SignUpDbModel.Store.Prospects" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Countries">
+        <PropertyRef Name="CountryCode" />
+      </Principal>
+      <Dependent Role="Prospects">
+        <PropertyRef Name="Country_CountryCode" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_dbo_Prospects_dbo_Roles_Role_RoleCode">
+    <End Role="Roles" Type="SignUpDbModel.Store.Roles" Multiplicity="0..1" />
+    <End Role="Prospects" Type="SignUpDbModel.Store.Prospects" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Roles">
+        <PropertyRef Name="RoleCode" />
+      </Principal>
+      <Dependent Role="Prospects">
+        <PropertyRef Name="Role_RoleCode" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="SignUpDbModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2006/04/edm">
+        <EntityType Name="Country">
+          <Key>
+            <PropertyRef Name="CountryCode" />
+          </Key>
+          <Property Name="CountryCode" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="CountryName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Prospects" Relationship="Self.FK_dbo_Prospects_dbo_Countries_Country_CountryCode" FromRole="Countries" ToRole="Prospects" />
+        </EntityType>
+        <EntityType Name="Prospect">
+          <Key>
+            <PropertyRef Name="ProspectId" />
+          </Key>
+          <Property Name="ProspectId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="FirstName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="LastName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="CompanyName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="EmailAddress" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Country" Relationship="Self.FK_dbo_Prospects_dbo_Countries_Country_CountryCode" FromRole="Prospects" ToRole="Countries" />
+          <NavigationProperty Name="Role" Relationship="Self.FK_dbo_Prospects_dbo_Roles_Role_RoleCode" FromRole="Prospects" ToRole="Roles" />
+        </EntityType>
+        <EntityType Name="Role">
+          <Key>
+            <PropertyRef Name="RoleCode" />
+          </Key>
+          <Property Name="RoleCode" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="RoleName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Prospects" Relationship="Self.FK_dbo_Prospects_dbo_Roles_Role_RoleCode" FromRole="Roles" ToRole="Prospects" />
+        </EntityType>
+        <Association Name="FK_dbo_Prospects_dbo_Countries_Country_CountryCode">
+          <End Role="Countries" Type="Self.Country" Multiplicity="0..1" />
+          <End Role="Prospects" Type="Self.Prospect" Multiplicity="*" />
+        </Association>
+        <Association Name="FK_dbo_Prospects_dbo_Roles_Role_RoleCode">
+          <End Role="Roles" Type="Self.Role" Multiplicity="0..1" />
+          <End Role="Prospects" Type="Self.Prospect" Multiplicity="*" />
+        </Association>
+        <EntityContainer Name="SignUpDbEntities">
+          <EntitySet Name="Countries" EntityType="Self.Country" />
+          <EntitySet Name="Prospects" EntityType="Self.Prospect" />
+          <EntitySet Name="Roles" EntityType="Self.Role" />
+          <AssociationSet Name="FK_dbo_Prospects_dbo_Countries_Country_CountryCode" Association="Self.FK_dbo_Prospects_dbo_Countries_Country_CountryCode">
+            <End Role="Countries" EntitySet="Countries" />
+            <End Role="Prospects" EntitySet="Prospects" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Prospects_dbo_Roles_Role_RoleCode" Association="Self.FK_dbo_Prospects_dbo_Roles_Role_RoleCode">
+            <End Role="Roles" EntitySet="Roles" />
+            <End Role="Prospects" EntitySet="Prospects" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+    <Mapping Space="C-S" xmlns="urn:schemas-microsoft-com:windows:storage:mapping:CS">
+  <EntityContainerMapping StorageEntityContainer="SignUpDbModelStoreContainer" CdmEntityContainer="SignUpDbEntities">
+    <EntitySetMapping Name="Countries">
+      <EntityTypeMapping TypeName="IsTypeOf(SignUpDbModel.Country)">
+        <MappingFragment StoreEntitySet="Countries">
+          <ScalarProperty Name="CountryCode" ColumnName="CountryCode" />
+          <ScalarProperty Name="CountryName" ColumnName="CountryName" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Prospects">
+      <EntityTypeMapping TypeName="IsTypeOf(SignUpDbModel.Prospect)">
+        <MappingFragment StoreEntitySet="Prospects">
+          <ScalarProperty Name="ProspectId" ColumnName="ProspectId" />
+          <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+          <ScalarProperty Name="LastName" ColumnName="LastName" />
+          <ScalarProperty Name="CompanyName" ColumnName="CompanyName" />
+          <ScalarProperty Name="EmailAddress" ColumnName="EmailAddress" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Roles">
+      <EntityTypeMapping TypeName="IsTypeOf(SignUpDbModel.Role)">
+        <MappingFragment StoreEntitySet="Roles">
+          <ScalarProperty Name="RoleCode" ColumnName="RoleCode" />
+          <ScalarProperty Name="RoleName" ColumnName="RoleName" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <AssociationSetMapping Name="FK_dbo_Prospects_dbo_Countries_Country_CountryCode" TypeName="SignUpDbModel.FK_dbo_Prospects_dbo_Countries_Country_CountryCode" StoreEntitySet="Prospects">
+      <EndProperty Name="Countries">
+        <ScalarProperty Name="CountryCode" ColumnName="Country_CountryCode" />
+      </EndProperty>
+      <EndProperty Name="Prospects">
+        <ScalarProperty Name="ProspectId" ColumnName="ProspectId" />
+      </EndProperty>
+      <Condition ColumnName="Country_CountryCode" IsNull="false" />
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="FK_dbo_Prospects_dbo_Roles_Role_RoleCode" TypeName="SignUpDbModel.FK_dbo_Prospects_dbo_Roles_Role_RoleCode" StoreEntitySet="Prospects">
+      <EndProperty Name="Roles">
+        <ScalarProperty Name="RoleCode" ColumnName="Role_RoleCode" />
+      </EndProperty>
+      <EndProperty Name="Prospects">
+        <ScalarProperty Name="ProspectId" ColumnName="ProspectId" />
+      </EndProperty>
+      <Condition ColumnName="Role_RoleCode" IsNull="false" />
+    </AssociationSetMapping>
+  </EntityContainerMapping>
+</Mapping></edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2007/06/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="false" />
+        <DesignerProperty Name="UseLegacyProvider" Value="True" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

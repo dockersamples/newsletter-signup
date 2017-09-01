@@ -1,0 +1,36 @@
+version: '3.3'
+
+services:
+  
+  signup-db:
+    image: dockersamples/mta-itpro-signup-db:v1
+    networks:
+      - app-net
+    volumes:
+      - mssql:c:\mssql
+    deploy:
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+        - node.platform.os == windows
+        - node.labels.ram == large
+
+  signup-app:
+    image: dockersamples/mta-itpro-signup-app:v3
+    ports:
+    - mode: host
+      published: 80
+      target: 8090
+    networks:
+      - app-net
+    deploy:
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+        - node.platform.os == windows
+
+networks:
+  app-net:
+
+volumes:
+  mssql:

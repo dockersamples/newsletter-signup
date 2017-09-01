@@ -1,9 +1,21 @@
 # escape=`
 FROM microsoft/mssql-server-windows-express
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
 ENV ACCEPT_EULA="Y" `
-    PASSWORD_PATH="C:\ProgramData\Docker\secrets\signup-db-sa.password"
+    sa_password="DockerCon!!!" `
+    DATA_PATH="C:\mssql"
 
-COPY init.ps1 .
+VOLUME ${DATA_PATH}
 
-CMD ["powershell", "./init.ps1", "-Verbose"]
+WORKDIR C:\init
+COPY . .
+
+CMD ./init.ps1 -sa_password $env:sa_password -Verbose
+
+HEALTHCHECK CMD powershell -command `
+    try { `
+     $result = Invoke-SqlCmd -Query 'SELECT TOP 1 1 FROM Countries' -Database SignUpDb; `
+     if ($result[0] -eq 1) { return 0} `
+     else {return 1}; `
+} catch { return 1 }
