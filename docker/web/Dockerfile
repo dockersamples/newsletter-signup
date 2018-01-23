@@ -1,17 +1,20 @@
 # escape=`
 
-FROM dockersamples/mta-dev-web-builder:4.7.1 AS builder
+FROM sixeyed/msbuild:netfx-4.5.2-webdeploy-10.0.14393.1198 AS builder
 
 WORKDIR C:\src\SignUp.Web
 COPY src\SignUp\SignUp.Web\packages.config .
 RUN nuget restore packages.config -PackagesDirectory ..\packages
 
 COPY src\SignUp C:\src
-RUN msbuild SignUp.Web.csproj /p:OutputPath=c:\out /p:DeployOnBuild=true
+RUN msbuild SignUp.Web.csproj /p:OutputPath=c:\out\web\SignUpWeb `
+        /p:DeployOnBuild=true /p:VSToolsPath=C:\MSBuild.Microsoft.VisualStudio.Web.targets.14.0.0.3\tools\VSToolsPath
 
 # app image
-FROM microsoft/aspnet:4.7.1-windowsservercore-1709
+FROM microsoft/aspnet:windowsservercore-10.0.14393.1198
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+RUN Set-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' -Name ServerPriorityTimeLimit -Value 0 -Type DWord
 
 WORKDIR C:\web-app
 RUN Import-Module WebAdministration; `
@@ -32,11 +35,11 @@ HEALTHCHECK --interval=5s `
     } catch { return 1 }
 
 ENV MESSAGE_QUEUE_URL="nats://message-queue:4222" `
-    DB_CONNECTION_STRING_PATH="" `
+    DB_CONNECTION_STRING_PATH="C:\ProgramData\Docker\secrets\signup-db.connectionstring" `
     DB_MAX_RETRY_COUNT="5" `
     DB_MAX_DELAY_SECONDS="10"
 
 ENTRYPOINT ["powershell", "C:\\bootstrap.ps1"]
 
 COPY .\docker\web\bootstrap.ps1 C:\
-COPY --from=builder C:\out\_PublishedWebsites\SignUp.Web C:\web-app
+COPY --from=builder C:\out\web\SignUpWeb\_PublishedWebsites\SignUp.Web C:\web-app
