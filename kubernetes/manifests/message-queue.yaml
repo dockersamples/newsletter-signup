@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: message-queue
+  labels:
+    app: message-queue
+spec:
+  ports:
+  - port: 4222
+    targetPort: 4222
+  selector:
+    app: message-queue
+  clusterIP: None
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: message-queue
+  name: message-queue
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: message-queue
+      name: message-queue
+    spec:
+      containers:
+      - name: message-queue
+        image: nats:1.0.4-linux
+      nodeSelector:
+        beta.kubernetes.io/os: linux

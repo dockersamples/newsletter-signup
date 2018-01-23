@@ -7,8 +7,6 @@ namespace SignUp.Model
     {
         private static Dictionary<string, string> _Values = new Dictionary<string, string>();
 
-        public static string DbConnectionStringPath { get { return Get("DB_CONNECTION_STRING_PATH"); } }
-
         public static string DbMaxRetryCount { get { return Get("DB_MAX_RETRY_COUNT"); } }
 
         public static string DbMaxDelaySeconds { get { return Get("DB_MAX_DELAY_SECONDS"); } }
