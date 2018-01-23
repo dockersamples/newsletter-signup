@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  labels:
+    app: db
+spec:
+  ports:
+  - port: 1433
+    targetPort: 1433
+  selector:
+    app: db
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: db
+  name: db
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: db
+      name: db
+    spec:
+      containers:
+      - name: db
+        image: microsoft/mssql-server-linux:2017-CU3
+        env:
+        - name: ACCEPT_EULA
+          value: "Y"
+        - name: SA_PASSWORD
+          value: "DockerCon!!!"
+      nodeSelector:
+        beta.kubernetes.io/os: linux
