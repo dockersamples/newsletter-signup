@@ -13,7 +13,7 @@ services:
       - app-net
 
   web:
-    image: dockersamples/signup-web:windowsservercore-1709
+    image: dockersamples/signup-web
     depends_on:
       - db
       - message-queue
@@ -21,7 +21,7 @@ services:
       - app-net
 
   save-handler:
-    image: dockersamples/signup-save-handler:windowsservercore-1709
+    image: dockersamples/signup-save-handler
     depends_on:
       - db
       - message-queue
@@ -29,7 +29,7 @@ services:
       - app-net
 
   index-handler:
-    image: dockersamples/signup-index-handler:windowsservercore-1709
+    image: dockersamples/signup-index-handler
     depends_on:
       - elasticsearch
       - message-queue
